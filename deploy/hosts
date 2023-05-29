@@ -1,0 +1,7 @@
+[web]
+server1 ansible_host=192.168.100.10
+server2 ansible_host=192.168.100.11
+
+[database]
+db1 ansible_host=192.168.100.12
+db2 ansible_host=192.168.100.13

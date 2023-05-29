@@ -1,0 +1,86 @@
+---
+- name: Deploy Laravel Application
+  hosts: bare_servers
+  gather_facts: yes
+
+  vars:
+    application_name: my_laravel_app
+    application_path: /var/www/html/{{ application_name }}
+    application_repo: git://github.com/your/repository.git
+    mysql_root_password: password
+    mysql_database: laravel_db
+    mysql_user: laravel_user
+    mysql_password: laravel_password
+
+  tasks:
+    - name: Update apt cache (Ubuntu/Debian)
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == 'Debian'
+
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - nginx
+        - mysql-server
+        - php
+        - php-fpm
+        - php-mysql
+        - composer
+      when: ansible_os_family == 'Debian'
+
+    - name: Clone the application repository
+      git:
+        repo: "{{ application_repo }}"
+        dest: "{{ application_path }}"
+
+    - name: Install Laravel dependencies
+      composer:
+        command: install
+        working_dir: "{{ application_path }}"
+        no_dev: yes
+
+    - name: Configure Laravel environment
+      template:
+        src: templates/.env.j2
+        dest: "{{ application_path }}/.env"
+        mode: 0644
+
+    - name: Generate Laravel application key
+      command: php artisan key:generate
+      args:
+        chdir: "{{ application_path }}"
+      become: yes
+
+    - name: Create MySQL database
+      mysql_db:
+        name: "{{ mysql_database }}"
+        state: present
+      become: yes
+
+    - name: Create MySQL user
+      mysql_user:
+        name: "{{ mysql_user }}"
+        password: "{{ mysql_password }}"
+        priv: "{{ mysql_database }}.*:ALL"
+        host: localhost
+        state: present
+      become: yes
+
+    - name: Configure Nginx
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/{{ application_name }}
+        mode: 0644
+      notify:
+        - Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
