@@ -1,67 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# PHP Laravel Web Application Deployment
 
-## About Laravel
+This repository contains the code and instructions for deploying a PHP Laravel web application with a MySQL database on physical bare servers using DevOps best practices.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Prerequisites
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Before you begin, make sure you have the following:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Physical bare servers (target servers) running a compatible operating system (e.g., Ubuntu 20.04)
+- Ansible installed on your local machine
+- Docker installed on your target servers
+- A Git repository set up to store the application code
+- Basic knowledge of Laravel, PHP, MySQL, Docker, and Ansible
 
-## Learning Laravel
+## Deployment Process
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Follow the steps below to deploy the PHP Laravel web application:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 1. Clone the Git Repository
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git clone https://github.com/i-bm/myLaravelApp
+cd myLaravelApp
+```
 
-## Laravel Sponsors
+### 2. Configure Ansible Inventory
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Open the `hosts.ini` file and specify the target servers' IP addresses or hostnames under the appropriate group(s).
 
-### Premium Partners
+```ini
+[web]
+server1 ansible_host=192.168.100.10
+server2 ansible_host=192.168.100.11
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+[database]
+db1 ansible_host=192.168.100.12
+db2 ansible_host=192.168.100.13
+```
 
-## Contributing
+### 3. Customize Deployment Configuration
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Open the `group_vars/all.yml` file and customize the deployment configuration according to your environment. Update variables such as the application name, database credentials, and any other required settings.
 
-## Code of Conduct
+### 4. Run the Ansible Playbook
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+ansible-playbook -i hosts.ini deploy.yml
+```
 
-## Security Vulnerabilities
+This will execute the Ansible playbook `deploy.yml` and automate the deployment process on the target servers.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Containerize the Application with Docker
 
-## License
+- Build the Docker image:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# myLaravelApp
+  ```bash
+  docker build -t laravel-app .
+  ```
+
+- Run the Docker container:
+
+  ```bash
+  docker run -d -p 80:80 --name laravel-container laravel-app
+  ```
+
+- Access the application in your web browser at `http://<server-ip>`.
+
+### 6. Configure MySQL for High Availability
+
+Implement the necessary steps to configure MySQL for high availability and scalability. This can include setting up replication, clustering, load balancing, and failover mechanisms. Ensure you follow best practices for securing the MySQL database and optimizing its performance.
+
+### 7. Implement Security Best Practices
+
+Take the following security measures to protect the application and infrastructure:
+
+- Use HTTPS for secure communication.
+- Configure a firewall to restrict access to necessary ports.
+- Enforce strong passwords and limited access privileges for the MySQL database.
+- Apply security patches and updates regularly.
+- Implement secure coding practices in the application code.
+- Perform regular vulnerability scans and security audits.
+
+### 8. Set Up Monitoring and Logging
+
+Configure monitoring and logging for the application and infrastructure:
+
+- Use a monitoring tool (e.g., Prometheus) to monitor server metrics, database performance, and application health.
+- Set up alerting rules to receive notifications for critical issues.
+- Implement centralized logging using tools like ELK stack or Splunk to collect and analyze logs from servers and the application.
+- Monitor application logs for errors, exceptions, and security-related events.
+
+## Local Development
+
+To run the application locally for development or testing purposes, follow these steps:
+
+1. Install PHP: Make sure you have PHP installed on your computer. You can download PHP from the official website (https://www.php.net/downloads.php) or use a package manager like Homebrew (for macOS) or Chocolatey (for Windows).
+
+2. Install Composer: Composer is a dependency management tool for PHP that Laravel uses. You can download and install Composer from the official website (https://getcomposer.org/download/). Follow the installation instructions for your operating system.
+
+3. Install Laravel: Once you have Composer installed, open a terminal or command prompt and run the following command to install Laravel globally on your system:
+
+   ```bash
+   composer global require laravel/installer
+   ```
+
+4. Clone the Laravel app: If you haven't done so already, clone the Laravel app repository from a version control system like Git. Navigate to the directory where you want to store the project and run the following command:
+
+   ```bash
+   git clone <repository_url>
+   ```
+
+5. Install project dependencies: Change into the project directory by running `cd <project_name>`. Next, install the project dependencies by running the following command:
+
+   ```bash
+   composer install
+   ```
+
+6. Create a .env file: Laravel requires an environment configuration file (.env) to run. You can duplicate the `.env.example` file and rename it to `.env`. Open the `.env` file and set the necessary environment variables such as database connection details, app URL, etc.
+
+7. Generate an application key: Laravel requires an application key for encryption and other security purposes. In the terminal, run the following command to generate an application key:
+
+   ```bash
+   php artisan key:generate
+   ```
+
+8. Set up the database: If your application uses a database, create a new database and update the necessary database configuration details in the `.env` file.
+
+9. Run migrations: Laravel uses database migrations to create the necessary database tables. Run the migrations using the following command:
+
+   ```bash
+   php artisan migrate
+   ```
+
+10. Start the development server: Finally, start the Laravel development server by running the following command:
+
+    ```bash
+    php artisan serve
+    ```
+
+   This command will start a local development server at `http://localhost:8000` by default.
+
+11. Access the application: Open your web browser and navigate to `http://localhost:8000` (or the URL shown in the terminal). If everything is set up correctly, you should see your Laravel application running locally.
+
+These steps should help you run a Laravel app locally on your machine.
