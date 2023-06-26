@@ -1,6 +1,6 @@
 sudo yum install python39 && sudo yum install python39-pip
 
-git clone https://i-bm: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@https://github.com/philipquansahme/ifrs1.5.git
+git clone https://i-bm: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@github.com/philipquansahme/ifrs1.5.git
 mv ifrs ifrsone && cd ifrsone
 virtualenv env
 source env/bin/activate
