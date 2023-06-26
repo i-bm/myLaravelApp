@@ -1,0 +1,16 @@
+sudo yum install python39 && sudo yum install python39-pip
+
+git clone https://i-bm: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@https://github.com/philipquansahme/ifrs1.5.git
+mv ifrs ifrsone && cd ifrsone
+virtualenv env
+source env/bin/activate
+
+
+pip3 install --upgrade pip
+
+pip3 install -r requirements.txt &&
+python3 manage.py makemigrations ifrs &&
+python3 manage.py migrate ifrs &&
+python3 manage.py makemigrations &&
+python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:5000
+python3 manage.py runserver 0.0.0.0:8000
